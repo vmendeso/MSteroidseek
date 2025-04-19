@@ -33,6 +33,10 @@ def login(username: str = Form(...), password: str = Form(...), db: Session = De
     return RedirectResponse(url="/login", status_code=302)
 
 
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard(request: Request):
+    return templates.TemplateResponse("dashboard.html", {"request": request})
+
 @app.post("/users/", response_model=schemas.UserRead)
 def create(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(db, user)
