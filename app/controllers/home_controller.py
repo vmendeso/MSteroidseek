@@ -3,7 +3,7 @@ import os
 import shutil
 from app.config.database import SessionLocal
 from app.models import crud
-from app.schemas import schemas
+from app.schemas import schema
 from sqlalchemy.orm import Session
 from app.views import templates
 
