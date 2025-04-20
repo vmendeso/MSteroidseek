@@ -1,0 +1,31 @@
+project/
+├── app/
+│   ├── config/
+|   |   └──pycache__
+|   |   └──data
+|   |      └──table.csv
+|   |   └──database.py
+│   ├── controllers/
+│   │   └── auth_controller.py
+│   │   └── home_controller.py
+│   ├── models/              # Modelos do banco (SQLAlchemy)
+│   │   └── crud.py
+|   |   └── user_model.py
+│   ├   └──schemas/             # Schemas Pydantic
+│   │      └── schema.py
+│   ├── routes/              # Rotas da aplicação (Controllers)
+│   │   └── auth_routes.py
+│   │   └── home_routes.py
+│   │   └── auth_routes.py
+│   ├── views/
+│   │   └── static/
+│   │       └── css/
+│   │           └── tailwind.css 
+│   │   └── templates/               # Páginas HTML (Views)
+│   │       └── login.html
+│   │       └── dashboard.html
+│   │       └── similarity.html
+│   └── aas_search.html
+├── main.py                  # Inicialização da aplicação FastAPI
+└── requirements.txt
+└── uploads/ 
