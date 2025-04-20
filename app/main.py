@@ -1,14 +1,21 @@
-from fastapi import FastAPI, Depends, HTTPException, Request, Form
+from fastapi import FastAPI, Depends, HTTPException, Request, Form, File, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
+from fastapi.staticfiles import StaticFiles
 from app.models import schemas, crud
 from fastapi.templating import Jinja2Templates
 from app.config.database import SessionLocal, engine, Base
+import os
+import shutil
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="User API")
+app.mount("/static", StaticFiles(directory="app/views/static"), name="static")
 templates = Jinja2Templates(directory="app/views/templates")
+
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 def get_db():
     db = SessionLocal()
@@ -40,6 +47,13 @@ async def dashboard(request: Request):
 @app.get("/dashboard/similarity", response_class=HTMLResponse)
 async def similarity_page(request: Request):
     return templates.TemplateResponse("similarity.html", {"request": request})
+
+@app.post("/upload-file")
+async def upload_file(file: UploadFile = File(...)):
+    file_location = os.path.join(UPLOAD_DIR, file.filename)
+    with open(file_location, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    return {"filename": file.filename, "message": "Upload realizado com sucesso!"}
 
 @app.get("/dashboard/aas-search", response_class=HTMLResponse)
 async def aas_page(request: Request):
