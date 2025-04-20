@@ -3,7 +3,7 @@ from rdkit import Chem
 from rdkit.Chem.Draw import rdMolDraw2D
 import base64
 
-def __moltosvg(self, mol, molSize = (300,300), kekulize = True):
+def __moltosvg(mol, molSize = (300,300), kekulize = True):
     mol = Chem.MolFromSmiles(mol)
     mc = Chem.Mol(mol.ToBinary())
     if kekulize:
@@ -20,8 +20,8 @@ def __moltosvg(self, mol, molSize = (300,300), kekulize = True):
     return svg.replace('svg:','')
 
 # render svg    
-def render_svg(self, smiles):
-    svg = __moltosvg(self, mol=smiles)
+def render_svg(smiles):
+    svg = __moltosvg(mol=smiles)
     b64 = base64.b64encode(svg.encode('utf-8')).decode("utf-8")
     html = r'<img src="data:image/svg+xml;base64,%s"/>' % b64
     #st.write(html, unsafe_allow_html=True)

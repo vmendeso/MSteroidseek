@@ -77,6 +77,17 @@
     <main class="flex-1 p-10">
         <h1 class="text-3xl font-bold text-gray-800 mb-6">Similarity Spectral Analysis</h1>
         <p class="text-gray-600">Aqui será exibido o resultado da análise.</p>
+         <!-- right panel -->
+        <div class="right-panel">
+            <h2 class="text-xl font-bold mb-4">Moléculas Renderizadas</h2>
+            <div class="grid grid-cols-1 gap-4">
+              {% for svg in svg_list %}
+                <div class="bg-white p-4 rounded shadow">
+                  {{ svg | safe }}
+                </div>
+              {% endfor %}
+            </div>
+        </div>
     </main>
 </div>
 

@@ -6,6 +6,10 @@ from app.models import crud
 from app.schemas import schema
 from sqlalchemy.orm import Session
 from app.views import templates
+from app.utils.molecule_designer import render_svg
+from fastapi.templating import Jinja2Templates
+
+templates = Jinja2Templates(directory="app/views/templates")
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -21,9 +25,12 @@ def handle_file_upload(file: UploadFile):
 
 # Função controladora para a página de Similarity
 def get_similarity_page(request):
-    # Aqui pode ser implementada a lógica necessária para a página de Similarity
-    return templates.TemplateResponse("similarity.html", {"request": request})
-
+    smiles_list = ["CCO", "C1=CC=CC=C1", "CC(=O)OC1=CC=CC=C1C(=O)O"]
+    svg_list = [render_svg(smiles) for smiles in smiles_list]
+    return templates.TemplateResponse("similarity.html", {
+        "request": request,
+        "svg_list": svg_list
+    })
 # Função controladora para a página de AAS Search
 def get_aas_search_page(request):
     # Aqui pode ser implementada a lógica necessária para a página de AAS Search

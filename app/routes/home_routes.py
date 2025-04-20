@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 import os
 import shutil
-from app.controllers.home_controller import handle_file_upload
+from app.controllers.home_controller import handle_file_upload, get_similarity_page
 
 from app.config.database import get_db
 
@@ -18,9 +18,9 @@ async def dashboard(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
 
-@router.get("/dashboard/similarity", response_class=HTMLResponse)
+@router.get("/dashboard/similarity")
 async def similarity_page(request: Request):
-    return templates.TemplateResponse("similarity.html", {"request": request})
+    return get_similarity_page(request)
 
 
 @router.get("/dashboard/aas-search", response_class=HTMLResponse)
