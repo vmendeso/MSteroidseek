@@ -37,6 +37,14 @@ def login(username: str = Form(...), password: str = Form(...), db: Session = De
 async def dashboard(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
+@app.get("/dashboard/similarity", response_class=HTMLResponse)
+async def similarity_page(request: Request):
+    return templates.TemplateResponse("similarity.html", {"request": request})
+
+@app.get("/dashboard/aas-search", response_class=HTMLResponse)
+async def aas_page(request: Request):
+    return templates.TemplateResponse("aas_search.html", {"request": request})
+
 @app.post("/users/", response_model=schemas.UserRead)
 def create(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(db, user)
