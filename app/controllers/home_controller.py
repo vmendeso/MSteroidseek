@@ -1,7 +1,11 @@
-from fastapi import UploadFile
+from fastapi import UploadFile, Request, Depends
 import os
 import shutil
-from app.config.database import SessionLocal
+from pathlib import Path
+import pandas as pd
+from app.config.database import SessionLocal, get_db, engine
+from app.models.crud_mol import get_all_molecules
+from app.utils.match_similarity import match_FP
 from app.models import crud
 from app.schemas import schema
 from sqlalchemy.orm import Session
@@ -24,13 +28,83 @@ def handle_file_upload(file: UploadFile):
     }
 
 # Função controladora para a página de Similarity
-def get_similarity_page(request):
-    smiles_list = ["CCO", "C1=CC=CC=C1", "CC(=O)OC1=CC=CC=C1C(=O)O"]
-    svg_list = [render_svg(smiles) for smiles in smiles_list]
-    return templates.TemplateResponse("similarity.html", {
-        "request": request,
-        "svg_list": svg_list
-    })
+
+# Função para renderizar a página de similaridade
+
+def get_similarity_page(request: Request, db=None):
+    # Apenas retorna a página vazia (será preenchida via JS)
+    return templates.TemplateResponse("similarity.html", {"request": request, "svg_list": []})
+
+# Função de análise de similaridade que lê o banco completo, extrai m/z e depois gera SVGs
+
+def run_similarity_analysis(
+    user_input: str,
+    threshold: float,
+    mode: str,
+    degree_freedom: int = 1
+):
+    try:
+        df_full = pd.read_sql_table(
+            table_name="similary_structur_mol",
+            con=engine,
+            schema="msteroid"
+        )
+        df_fpx = pd.read_csv("app/config/data/df_fp1_all_EI.csv")
+        df_fpx = df_fpx.drop(df_fpx.columns[0], axis=1)
+    except Exception as e:
+        return [], f"Erro ao ler tabela do banco: {e}", 500
+
+    if "m/z" not in df_full.columns:
+        return [], "Coluna 'm/z' não encontrada na tabela.", 400
+    
+    with open(f'uploads/{user_input}', 'r', encoding='utf-8') as f:
+        conteudo = f.read()
+    print(conteudo)
+    user_input = conteudo
+    #user_input= '59, 130, 131, 131, 131, 132, 133, 147, 148, 149, 149, 151, 161, 163, 177, 193, 237, 251, 267, 382'
+    try:
+        result_dict = match_FP(
+            user_input=user_input,
+            degree_freedom=degree_freedom,
+            df_fpx=df_fpx,
+            df_db=df_full,
+            threshold=threshold,
+            metric=mode
+        )
+    except Exception as e:
+        return [], f"Erro na similaridade: {e}", 500
+
+    svg_list = []
+    for idx_str in result_dict.keys():
+        try:
+            idx = int(idx_str)
+            smiles = df_full.at[idx, "smiles"]
+            svg_list.append(render_svg(smiles))
+        except Exception:
+            continue
+
+    message = "Análise concluída com sucesso!"
+    return svg_list
+
+# def get_similarity_page(request: Request, db: Session):
+#     molecules = get_all_molecules(db)
+#     svg_list = [render_svg(mol.smiles) for mol in molecules if mol.smiles]
+#     return templates.TemplateResponse("similarity.html", {
+#         "request": request,
+#         "svg_list": svg_list
+#     })
+
+
+
+#def get_similarity_page(request):
+#    smiles_list = ["CCO", "C1=CC=CC=C1", "CC(=O)OC1=CC=CC=C1C(=O)O"]
+#    svg_list = [render_svg(smiles) for smiles in smiles_list]
+#    return templates.TemplateResponse("similarity.html", {
+#        "request": request,
+#        "svg_list": svg_list
+#    })
+
+
 # Função controladora para a página de AAS Search
 def get_aas_search_page(request):
     # Aqui pode ser implementada a lógica necessária para a página de AAS Search

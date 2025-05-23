@@ -1,105 +1,126 @@
-<!-- templates/similarity.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Similarity Spectral Analysis</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <title>Análise de Similaridade Espectral</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 font-sans">
-
-<div class="flex h-screen">
-    <!-- Sidebar -->
-    <aside class="w-64 bg-white shadow-lg">
-        <div class="p-6 text-center border-b">
-            <h2 class="text-xl font-bold text-gray-800">Set your parameters for Similarity Analysis</h2>
+  <div class="flex h-screen">
+    <!-- Barra Lateral -->
+    <aside class="w-64 bg-white shadow-lg flex flex-col">
+      <!-- Cabeçalho -->
+      <div class="p-6 border-b">
+        <h2 class="text-xl font-bold text-gray-800">Parâmetros</h2>
+      </div>
+      <!-- Controles -->
+      <div class="p-6 flex-grow overflow-auto space-y-6">
+        <!-- Slider -->
+        <div>
+          <label for="threshold" class="block text-sm font-medium text-gray-700 mb-1">Cutoff</label>
+          <input id="threshold" type="range" min="0" max="1" step="0.01" value="0.7" class="w-full accent-blue-600">
+          <div id="threshold-value" class="mt-1 text-center text-gray-700 font-semibold">0.70</div>
         </div>
-        <div class="p-6 space-y-6">
-            <!-- Slider -->
-            <div>
-                <label for="threshold" class="block text-sm font-medium text-gray-700 mb-1">cutoff</label>
-                <input id="threshold" type="range" min="0" max="1" step="0.01" value="0.7" 
-                       class="w-full accent-blue-600">
-                <div id="threshold-value" class="text-center mt-1 text-gray-700 font-semibold">0.70</div>
-            </div>
-
-            <!-- Radio Buttons -->
-            <div>
-                <p class="text-sm font-medium text-gray-700 mb-1">set method of similarity calculation</p>
-                <label class="inline-flex items-center mb-1">
-                    <input type="radio" class="form-radio text-blue-600" name="mode" value="normal" checked>
-                    <span class="ml-2 text-gray-700">Cosseno</span>
-                </label><br>
-                <label class="inline-flex items-center">
-                    <input type="radio" class="form-radio text-blue-600" name="mode" value="avancado">
-                    <span class="ml-2 text-gray-700">Geometrico</span>
-                </label>
-            </div>
-            <!-- File Upload -->
-            <div>
-                <label for="file-upload" class="block text-sm font-medium text-gray-700 mb-1">Upload de Arquivo</label>
-                <input id="file-upload" type="file"
-                       class="block w-full text-sm text-gray-700
-                              file:mr-4 file:py-2 file:px-4
-                              file:rounded-full file:border-0
-                              file:text-sm file:font-semibold
-                              file:bg-blue-50 file:text-blue-700
-                              hover:file:bg-blue-100 cursor-pointer"/>
-            
-                <p id="upload-status" class="text-sm mt-2 text-green-600"></p>
-            </div>
-            <!--js File Upload-->
-            <script>
-                const input = document.getElementById("file-upload");
-                const status = document.getElementById("upload-status");
-            
-                input.addEventListener("change", async () => {
-                    const file = input.files[0];
-                    if (!file) return;
-                
-                    const formData = new FormData();
-                    formData.append("file", file);
-                
-                    const response = await fetch("/upload-file", {
-                        method: "POST",
-                        body: formData
-                    });
-                
-                    const result = await response.json();
-                    status.textContent = result.message || "Arquivo enviado!";
-                });
-            </script>
-        
+        <!-- Botões de Rádio -->
+        <div>
+          <p class="text-sm font-medium text-gray-700 mb-1">Método de Similaridade</p>
+          <label class="inline-flex items-center mr-4">
+            <input type="radio" name="mode" value="tanimoto" checked class="form-radio text-blue-600">
+            <span class="ml-2">Cosseno</span>
+          </label>
+          <label class="inline-flex items-center">
+            <input type="radio" name="mode" value="geometric" class="form-radio text-blue-600">
+            <span class="ml-2">Geométrico</span>
+          </label>
         </div>
+        <!-- Upload de Arquivo -->
+        <div>
+          <label for="file-upload" class="block text-sm font-medium text-gray-700 mb-1">Upload m/z CSV</label>
+          <input id="file-upload" type="file" accept=".csv" class="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+          <p id="upload-status" class="mt-2 text-sm text-green-600"></p>
+        </div>
+      </div>
+      <!-- Rodapé: Botão de Execução -->
+      <div class="p-6 border-t">
+        <button id="run-similarity" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow transition duration-300">
+          ▶️ Executar Similaridade
+        </button>
+        <p id="similarity-result" class="mt-3 text-sm text-green-700"></p>
+      </div>
     </aside>
-
-    <!-- Main content -->
-    <main class="flex-1 p-10">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6">Similarity Spectral Analysis</h1>
-        <p class="text-gray-600">Aqui será exibido o resultado da análise.</p>
-         <!-- right panel -->
-        <div class="right-panel">
-            <h2 class="text-xl font-bold mb-4">Moléculas Renderizadas</h2>
-            <div class="grid grid-cols-1 gap-4">
-              {% for svg in svg_list %}
-                <div class="bg-white p-4 rounded shadow">
-                  {{ svg | safe }}
-                </div>
-              {% endfor %}
-            </div>
-        </div>
+    <!-- Conteúdo Principal -->
+    <main class="flex-1 p-10 overflow-y-auto">
+      <h1 class="text-3xl font-bold text-gray-800 mb-6">Análise de Similaridade Espectral</h1>
+      <div id="svg-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Os SVGs resultantes serão inseridos aqui -->
+      </div>
     </main>
-</div>
-
-<script>
-    // Atualizar valor do slider em tempo real
+  </div>
+  <script>
+    // Atualização do valor do slider
     const slider = document.getElementById('threshold');
     const valueDisplay = document.getElementById('threshold-value');
-
     slider.addEventListener('input', () => {
-        valueDisplay.textContent = parseFloat(slider.value).toFixed(2);
+      valueDisplay.textContent = parseFloat(slider.value).toFixed(2);
     });
-</script>
 
+    // Upload de Arquivo
+    const input = document.getElementById('file-upload');
+    const status = document.getElementById('upload-status');
+    let uploadedFileName = null;
+    input.addEventListener('change', async () => {
+      const file = input.files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const res = await fetch('/upload-file', { method: 'POST', body: formData });
+        const result = await res.json();
+        status.textContent = result.message || 'Arquivo enviado com sucesso.';
+        uploadedFileName = result.filename;
+      } catch (error) {
+        status.textContent = 'Erro ao enviar o arquivo.';
+        console.error('Erro no upload:', error);
+      }
+    });
+
+    // Execução da Similaridade
+    document.getElementById('run-similarity').addEventListener('click', async () => {
+      if (!uploadedFileName) {
+        status.textContent = 'Por favor, envie o arquivo CSV primeiro.';
+        return;
+      }
+
+      const threshold = parseFloat(slider.value);
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+
+      try {
+        const res = await fetch('/run-similarity', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ file: uploadedFileName, threshold, mode })
+        });
+
+        if (!res.ok) {
+          document.getElementById('similarity-result').textContent = 'Erro ao processar a análise.';
+          return;
+        }
+
+        const { svg_list, message } = await res.json();
+        document.getElementById('similarity-result').textContent = message;
+        const container = document.getElementById('svg-container');
+        container.innerHTML = '';
+        svg_list.forEach(html => {
+          const div = document.createElement('div');
+          div.className = 'bg-white p-4 rounded shadow';
+          div.innerHTML = html;
+          container.appendChild(div);
+        });
+      } catch (error) {
+        document.getElementById('similarity-result').textContent = 'Erro ao processar a análise.';
+        console.error('Erro na análise:', error);
+      }
+    });
+  </script>
 </body>
 </html>
