@@ -11,6 +11,7 @@ from app.schemas import schema
 from sqlalchemy.orm import Session
 from app.views import templates
 from app.utils.molecule_designer import render_svg
+from app.utils.mass_matrix_builder import frag_matrix_builder, run_anabolic_model
 from fastapi.templating import Jinja2Templates
 
 templates = Jinja2Templates(directory="app/views/templates")
@@ -92,11 +93,22 @@ def get_aas_search_page(request):
     # Aqui pode ser implementada a lógica necessária para a página de AAS Search
     return templates.TemplateResponse("aas_search.html", {"request": request})
 
-def run_dopping_analysis(user_input: str):
-    with open(f'uploads/{user_input}', 'r', encoding='utf-8') as f:
-        conteudo = f.read()
-    print(conteudo)
-    user_input = conteudo
+
+
+def run_dopping_analysis(exact_mass: float, mz_list, intensity_list):
+    try:
+        matrix_ms_fp = frag_matrix_builder(mz_list,intensity_list,exact_mass)
+        print(matrix_ms_fp)
+        result = run_anabolic_model(matrix_ms_fp)
+        if result == 1:
+            analise_result = "This sample was classifier as doping"
+        else:
+            analise_result = "This sample was classifier not doping"
+    except Exception as e:
+        return f"Erro na dopping: {e}", 500
+    return analise_result
+    
+    
     
 
 # Função controladora para visualizar os usuários

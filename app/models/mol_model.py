@@ -14,3 +14,9 @@ class SimilarityParams(BaseModel):
     mode: str
     user_input: str
     degree_freedom: int
+    
+# Modelo do corpo da requisição JSON para run-similarity
+class DoppingRequest(BaseModel):
+    mz_file: str
+    intensity_file: str
+    exact_mass: str

@@ -1,5 +1,8 @@
 import pandas as pd
 import numpy as np
+import pickle
+import sklearn
+
 
 # steroid mass matrix builder
 def frag_matrix_builder(mass,intencity_rel,exact_mass):
@@ -7,9 +10,9 @@ def frag_matrix_builder(mass,intencity_rel,exact_mass):
     mz_temp = [int(float(x)) for x in mass]
     
     ## separando int.rel
-    rel_temp = [int(float(x))/10 for x in intencity_rel]
+    rel_temp = [int(float(x)) for x in intencity_rel]
     # massa exata
-    exact_mz = exact_mass
+    exact_mz = int(exact_mass)
     # buscando lista de m/z (artigo)
     mz4steroid_subtracao = [15,29,90,180,270,105,195,285,119,209,103,193,283,143,155,140,157,144]
     sinais_mz = [103,129,143,169,244,218,231]
@@ -75,3 +78,15 @@ def frag_matrix_builder(mass,intencity_rel,exact_mass):
     
     
     return list_final
+
+
+def run_anabolic_model(descriptor_ms):
+    xgb_path = "app/config/data/ml_models/model_GBC_testo.sav"
+    import joblib
+
+    _xgb = joblib.dump("/home/sakod/Documentos/projetos/MSteroide_1/app/config/data/ml_models/model_GBC_testo.sav", 'model_GBC_testo2.pkl')
+    _xgb = joblib.load('/home/sakod/Documentos/projetos/MSteroide_1/model_GBC_testo2.pkl')
+    #_xgb = pickle.load(open(_xgb))
+    #result_rt = self._rf.predict([descriptor_ms])
+    result_xgb = _xgb.predict([descriptor_ms])
+    return result_xgb

@@ -15,6 +15,12 @@
       </div>
       <!-- Controles -->
       <div class="p-6 flex-grow overflow-auto space-y-6">
+        <!-- Entrada de nome do composto -->
+        <div>
+          <label for="exact-mass" class="block text-sm font-medium text-gray-700 mb-1">put exact mass here</label>
+          <input id="exact-mass" type="text" placeholder="Digite o nome do composto" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+        </div>
+
         <!-- Upload de Arquivo m/z -->
         <div>
           <label for="file-mz" class="block text-sm font-medium text-gray-700 mb-1">Upload m/z file</label>
@@ -91,29 +97,17 @@
         document.getElementById('similarity-result').textContent = 'Por favor, envie ambos os arquivos.';
         return;
       }
-
+    const exactMass = document.getElementById('exact-mass').value;
       try {
-        const res = await fetch('/run-similarity', {
+        const res = await fetch('/run-dopping', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             mz_file: uploadedMzFile,
-            intensity_file: uploadedIntensityFile
+            intensity_file: uploadedIntensityFile,
+            exact_mass: exactMass
           })
         });
-
-        const data = await res.json();
-        document.getElementById('similarity-result').textContent = data.message;
-        
-        const container = document.getElementById('svg-container');
-        container.innerHTML = '';
-        data.svg_list.forEach(svg => {
-          const div = document.createElement('div');
-          div.className = 'bg-white p-4 rounded shadow';
-          div.innerHTML = svg;
-          container.appendChild(div);
-        });
-
       } catch (error) {
         document.getElementById('similarity-result').textContent = 'Erro ao processar a análise.';
         console.error(error);
