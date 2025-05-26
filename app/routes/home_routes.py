@@ -46,16 +46,21 @@ async def run_similarity(request: Request):
     print(svg_list)
     return JSONResponse(content={"svg_list": svg_list, "message": "Análise concluída com sucesso."})
 
-# @router.post("/run-similarity")
-# async def run_similarity(params: SimilarityParams):
-#     svg_list, message, status = run_similarity_analysis(
-#         user_input=params.user_input,
-#         threshold=params.threshold,
-#         mode=params.mode,
-#         degree_freedom=params.degree_freedom
-#     )
-#     return JSONResponse(content={"svg_list": svg_list, "message": message}, status_code=status)
+@router.post("/run-ass-analysis")
+async def run_similarity(request: Request):
+    data = await request.json()
+    file = data.get("file")
+    print(file)
+    threshold = data.get("threshold")
+    mode = data.get("mode")
 
+    # Lógica de processamento da análise de similaridade
+    # Suponha que você obtenha uma lista de SVGs como resultado
+    svg_list = run_similarity_analysis(
+        user_input=file,
+        threshold=threshold,
+        mode=mode
+    )
 
 @router.get("/dashboard/aas-search", response_class=HTMLResponse)
 async def aas_page(request: Request):

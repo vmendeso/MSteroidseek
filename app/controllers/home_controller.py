@@ -86,29 +86,18 @@ def run_similarity_analysis(
     message = "Análise concluída com sucesso!"
     return svg_list
 
-# def get_similarity_page(request: Request, db: Session):
-#     molecules = get_all_molecules(db)
-#     svg_list = [render_svg(mol.smiles) for mol in molecules if mol.smiles]
-#     return templates.TemplateResponse("similarity.html", {
-#         "request": request,
-#         "svg_list": svg_list
-#     })
-
-
-
-#def get_similarity_page(request):
-#    smiles_list = ["CCO", "C1=CC=CC=C1", "CC(=O)OC1=CC=CC=C1C(=O)O"]
-#    svg_list = [render_svg(smiles) for smiles in smiles_list]
-#    return templates.TemplateResponse("similarity.html", {
-#        "request": request,
-#        "svg_list": svg_list
-#    })
-
 
 # Função controladora para a página de AAS Search
 def get_aas_search_page(request):
     # Aqui pode ser implementada a lógica necessária para a página de AAS Search
     return templates.TemplateResponse("aas_search.html", {"request": request})
+
+def run_dopping_analysis(user_input: str):
+    with open(f'uploads/{user_input}', 'r', encoding='utf-8') as f:
+        conteudo = f.read()
+    print(conteudo)
+    user_input = conteudo
+    
 
 # Função controladora para visualizar os usuários
 def get_users(db: Session, skip: int = 0, limit: int = 100):
