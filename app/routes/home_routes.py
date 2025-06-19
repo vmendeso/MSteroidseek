@@ -71,8 +71,9 @@ async def run_dopping(payload: DoppingRequest):
         print(f"Result analise: {result_dopping}")
 
        
-        return JSONResponse(content={"message": f"Análise realizada com sucesso para {exact_mass}."
-    
+        return JSONResponse(content={
+                            "message": f"Análise realizada com sucesso para {exact_mass}.",
+                            "result": result_dopping  
         })
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao executar análise: {str(e)}")
