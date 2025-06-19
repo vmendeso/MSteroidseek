@@ -39,13 +39,12 @@
         <button id="run-dopping" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow transition duration-300">
           ▶️ Execute Dopping Analysis
         </button>
-        <p id="similarity-result" class="mt-3 text-sm text-green-700"></p>
       </div>
     </aside>
     <!-- Conteúdo Principal -->
     <main class="flex-1 p-10 overflow-y-auto">
       <h1 class="text-3xl font-bold mb-4">AAS Dopping Search</h1>
-      <div id="svg-container" class="grid grid-cols-1 gap-4"></div>
+      <div id="analysis-result" class="mt-6 text-xl font-semibold text-blue-800"></div>
     </main>
   </div>
 
@@ -92,12 +91,16 @@
     });
 
     // Botão de execução
+
+    
     document.getElementById('run-dopping').addEventListener('click', async () => {
-      if (!uploadedMzFile || !uploadedIntensityFile) {
-        document.getElementById('similarity-result').textContent = 'Por favor, envie ambos os arquivos.';
+
+      const exactMass = document.getElementById('exact-mass').value;
+      if (!uploadedMzFile || !uploadedIntensityFile || !exactMass) {
+        document.getElementById('analysis-result').textContent = 'Por favor, envie ambos os arquivos.';
         return;
       }
-    const exactMass = document.getElementById('exact-mass').value;
+    
       try {
         const res = await fetch('/run-dopping', {
           method: 'POST',
@@ -108,10 +111,20 @@
             exact_mass: exactMass
           })
         });
-      } catch (error) {
-        document.getElementById('similarity-result').textContent = 'Erro ao processar a análise.';
-        console.error(error);
-      }
+      
+        const data = await res.json();
+
+        if (!res.ok) {
+          document.getElementById('analysis-result').textContent = data.detail || 'Erro na análise.';
+          return;
+        }
+
+        document.getElementById('analysis-result').textContent = data.result;
+
+    } catch (error) {
+      document.getElementById('analysis-result').textContent = 'Erro ao executar análise.';
+      console.error(error);
+    }
     });
   </script>
 </body>

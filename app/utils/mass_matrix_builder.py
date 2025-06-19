@@ -82,11 +82,8 @@ def frag_matrix_builder(mass,intencity_rel,exact_mass):
 
 def run_anabolic_model(descriptor_ms):
     xgb_path = "app/config/data/ml_models/model_GBC_testo.sav"
-    import joblib
-
-    _xgb = joblib.dump("/home/sakod/Documentos/projetos/MSteroide_1/app/config/data/ml_models/model_GBC_testo.sav", 'model_GBC_testo2.pkl')
-    _xgb = joblib.load('/home/sakod/Documentos/projetos/MSteroide_1/model_GBC_testo2.pkl')
-    #_xgb = pickle.load(open(_xgb))
+    with open("app/config/data/ml_models/model_RFC_testo.sav", "rb") as f:
+        _xgb = pickle.load(f)
     #result_rt = self._rf.predict([descriptor_ms])
     result_xgb = _xgb.predict([descriptor_ms])
     return result_xgb
