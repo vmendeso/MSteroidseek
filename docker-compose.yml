@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  postdb-ms:
+    image: postgres:15
+    container_name: postdb-ms
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: vitor
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: msteroid_db
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: app-ms
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postdb-ms
+    environment:
+      DATABASE_URL: postgresql+psycopg2://vitor:password@postdb-ms:5432/msteroid_db?options=-csearch_path=msteroid
+
+volumes:
+  pgdata:

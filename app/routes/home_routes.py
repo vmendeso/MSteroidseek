@@ -10,8 +10,11 @@ from app.controllers.home_controller import (
     handle_file_upload,
     get_similarity_page,
     run_similarity_analysis,
-    run_dopping_analysis
+    run_dopping_analysis,
+    make_plot,
+    clean_and_convert
 )
+from app.models.plot import PlotRequest
 from app.models.mol_model import SimilarityParams, DoppingRequest # Parâmetros de similaridade
 import pandas as pd
 
@@ -82,6 +85,30 @@ async def run_dopping(payload: DoppingRequest):
 async def aas_page(request: Request):
     return templates.TemplateResponse("aas_search.html", {"request": request})
 
+@router.post("/plot-spectrum")
+async def plot_spectrum(payload: PlotRequest):
+    mz_path = os.path.join(UPLOAD_DIR, payload.mz)
+    intensity_path = os.path.join(UPLOAD_DIR, payload.intensity)
+    if not os.path.exists(mz_path) or not os.path.exists(intensity_path):
+        raise HTTPException(status_code=404, detail="Arquivos não encontrados.")
+    
+    # Parametros e dados dopping
+    mz_user = list(pd.read_csv(mz_path))
+    intensity_user = list(pd.read_csv(intensity_path))
+    #with open(intensity_path, 'r', encoding='utf-8') as f:
+    #    intensity_user = f.read()
+    #intensity_user = list(intensity_user)
+    intensity_user = [clean_and_convert(x) for x in intensity_user if clean_and_convert(x) is not None]
+    #intensity_user = [int(v) for v in intensity_user]
+    print(intensity_user)
+    try:
+        plot_html = make_plot(mz_user, intensity_user)
+        plot_html
+        #return print(JSONResponse(content={"plot_html": plot_html}))
+        return {"plot_html": plot_html}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao gerar gráfico: {str(e)}")
+    
 
 @router.post("/upload-file")
 async def upload_file(file: UploadFile = File(...)):

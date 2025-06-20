@@ -1,4 +1,8 @@
 from fastapi import FastAPI
+from sqlalchemy import text
+from app.config.database import engine
+with engine.connect() as conn:
+    conn.execute(text("CREATE SCHEMA IF NOT EXISTS msteroid"))
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from app.config.database import Base, engine, load_dataframe_to_db

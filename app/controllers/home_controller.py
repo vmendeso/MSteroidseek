@@ -1,18 +1,31 @@
+# fastAPI
 from fastapi import UploadFile, Request, Depends
+from fastapi.templating import Jinja2Templates
+
+# config db
+from app.config.database import SessionLocal, get_db, engine
+from app.schemas import schema
+from sqlalchemy.orm import Session
+
+# models
+from app.models.crud_mol import get_all_molecules
+from app.models import crud
+
+# functions
+from app.utils.match_similarity import match_FP
+from app.utils.molecule_designer import render_svg
+from app.utils.mass_matrix_builder import frag_matrix_builder, run_anabolic_model
+
+# front-pages
+from app.views import templates
+
+# other libs
 import os
 import shutil
 from pathlib import Path
 import pandas as pd
-from app.config.database import SessionLocal, get_db, engine
-from app.models.crud_mol import get_all_molecules
-from app.utils.match_similarity import match_FP
-from app.models import crud
-from app.schemas import schema
-from sqlalchemy.orm import Session
-from app.views import templates
-from app.utils.molecule_designer import render_svg
-from app.utils.mass_matrix_builder import frag_matrix_builder, run_anabolic_model
-from fastapi.templating import Jinja2Templates
+import plotly.express as px
+from plotly.io import to_html
 
 templates = Jinja2Templates(directory="app/views/templates")
 
@@ -94,6 +107,15 @@ def get_aas_search_page(request):
     return templates.TemplateResponse("aas_search.html", {"request": request})
 
 
+def clean_and_convert(val):
+    val = val.strip()           # remove espaços
+    if val.count('.') > 1:      # se tiver mais de um ponto, corta no segundo
+        val = '.'.join(val.split('.')[:2])
+    try:
+        return float(val)
+    except ValueError:
+        return None 
+
 
 def run_dopping_analysis(exact_mass: float, mz_list, intensity_list):
     try:
@@ -107,6 +129,19 @@ def run_dopping_analysis(exact_mass: float, mz_list, intensity_list):
     except Exception as e:
         return f"Erro na dopping: {e}", 500
     return analise_result
+
+def make_plot(mz_list, intensity_list):
+    # Genarate data
+    
+    data_plot = {'mz': mz_list, 'intensity': intensity_list}
+    df_plot = pd.DataFrame(data_plot)
+    
+    # Generate plot
+    fig = px.bar(df_plot, x='mz', y='intensity', title='Your mass spectra')
+    
+    # Convert the plot to HTML
+    plot_div = to_html(fig, full_html=False, include_plotlyjs='cdn')
+    return plot_div
     
     
     
