@@ -1,0 +1,1 @@
+CREATE USER vitor_admin WITH PASSWORD 'Sakod';
