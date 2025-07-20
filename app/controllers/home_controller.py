@@ -1,25 +1,26 @@
-# fastAPI
+# app/controllers/home_controller.py
+"""
+Controlador Home
+----------------
+Funções para upload de arquivos, renderização de páginas, análise de similaridade e dopping.
+"""
+
+# Imports FastAPI e SQLAlchemy
 from fastapi import UploadFile, Request, Depends
 from fastapi.templating import Jinja2Templates
-
-# config db
-from app.config.database import SessionLocal, get_db, engine
-from app.schemas import schema
 from sqlalchemy.orm import Session
 
-# models
+# Imports internos do projeto
+from app.config.database import SessionLocal, get_db, engine
+from app.schemas import schema
 from app.models.crud_mol import get_all_molecules
 from app.models import crud
-
-# functions
 from app.utils.match_similarity import match_FP
 from app.utils.molecule_designer import render_svg
 from app.utils.mass_matrix_builder import frag_matrix_builder, run_anabolic_model
-
-# front-pages
 from app.views import templates
 
-# other libs
+# Outros imports
 import os
 import shutil
 from pathlib import Path
@@ -27,12 +28,17 @@ import pandas as pd
 import plotly.express as px
 from plotly.io import to_html
 
+# Inicialização de templates e diretórios
 templates = Jinja2Templates(directory="app/views/templates")
-
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+# ---------------------- FUNÇÕES DE UPLOAD ----------------------
+
 def handle_file_upload(file: UploadFile):
+    """
+    Realiza upload de arquivo e salva no diretório de uploads.
+    """
     file_location = os.path.join(UPLOAD_DIR, file.filename)
     with open(file_location, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
@@ -41,15 +47,14 @@ def handle_file_upload(file: UploadFile):
         "message": "Upload realizado com sucesso!"
     }
 
-# Função controladora para a página de Similarity
-
-# Função para renderizar a página de similaridade
+# ---------------------- FUNÇÕES DE SIMILARIDADE ----------------------
 
 def get_similarity_page(request: Request, db=None):
+    """
+    Renderiza página de similaridade.
+    """
     # Apenas retorna a página vazia (será preenchida via JS)
     return templates.TemplateResponse("similarity.html", {"request": request, "svg_list": []})
-
-# Função de análise de similaridade que lê o banco completo, extrai m/z e depois gera SVGs
 
 def run_similarity_analysis(
     user_input: str,
@@ -57,6 +62,9 @@ def run_similarity_analysis(
     mode: str,
     degree_freedom: int = 1
 ):
+    """
+    Executa análise de similaridade e gera SVGs.
+    """
     try:
         df_full = pd.read_sql_table(
             table_name="similary_structur_mol",
@@ -103,11 +111,17 @@ def run_similarity_analysis(
 
 # Função controladora para a página de AAS Search
 def get_aas_search_page(request):
+    """
+    Renderiza página de busca AAS.
+    """
     # Aqui pode ser implementada a lógica necessária para a página de AAS Search
     return templates.TemplateResponse("aas_search.html", {"request": request})
 
 
 def clean_and_convert(val):
+    """
+    Limpa e converte valores para float.
+    """
     val = val.strip()           # remove espaços
     if val.count('.') > 1:      # se tiver mais de um ponto, corta no segundo
         val = '.'.join(val.split('.')[:2])
@@ -118,6 +132,9 @@ def clean_and_convert(val):
 
 
 def run_dopping_analysis(exact_mass: float, mz_list, intensity_list):
+    """
+    Executa análise de doping.
+    """
     try:
         matrix_ms_fp = frag_matrix_builder(mz_list,intensity_list,exact_mass)
         print(matrix_ms_fp)
@@ -131,6 +148,9 @@ def run_dopping_analysis(exact_mass: float, mz_list, intensity_list):
     return analise_result
 
 def make_plot(mz_list, intensity_list):
+    """
+    Gera plot da espectrometria de massas.
+    """
     # Genarate data
     
     data_plot = {'mz': mz_list, 'intensity': intensity_list}
@@ -148,4 +168,7 @@ def make_plot(mz_list, intensity_list):
 
 # Função controladora para visualizar os usuários
 def get_users(db: Session, skip: int = 0, limit: int = 100):
+    """
+    Retorna lista de usuários.
+    """
     return crud.get_users(db, skip, limit)

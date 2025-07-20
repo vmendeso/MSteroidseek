@@ -1,0 +1,130 @@
+📚 Base de Conhecimento: Construção de Projetos RAG Robustos
+1. Fundamentos do Paradigma RAG
+1.1 Definição
+RAG combina recuperação de informações (IR) com geração de texto por LLMs.
+
+Útil para mitigar alucinações e incorporar informações atualizadas ou privadas.
+
+1.2 Componentes Principais
+Retriever: Localiza documentos relevantes. Pode ser dense (e.g. FAISS + embeddings) ou sparse (e.g. BM25).
+
+Generator: Modelo de linguagem (e.g. GPT, LLaMA) que responde com base no contexto recuperado.
+
+Index: Estrutura eficiente para busca (e.g. FAISS, Elasticsearch, Qdrant).
+
+Pipeline de Pré-processamento: Tokenização, chunking, normalização e enriquecimento semântico.
+
+Prompting Dinâmico: Controle do contexto injetado, com técnicas como re-ranking e janela deslizante.
+
+2. Construção da Base de Conhecimento
+2.1 Coleta e Curadoria
+Fontes: PDFs, sites, bases SQL, planilhas, APIs, arquivos internos.
+
+Estratégia: separação por domínios, rotulagem semântica, versionamento.
+
+2.2 Pré-processamento
+Chunking ideal: 100–300 palavras por chunk.
+
+Técnicas: limpeza de HTML, OCR, eliminação de stopwords, lematização.
+
+Adição de metadados: origem, data, tags, autor, linguagem.
+
+2.3 Geração de Embeddings
+Modelos: text-embedding-ada-002, bge-m3, all-MiniLM, e5.
+
+Cuidados:
+
+Normalização vetorial.
+
+Armazenamento persistente no vector store (ex: Qdrant, Weaviate, Pinecone).
+
+2.4 Indexação
+Escolher índice compatível com seu caso:
+
+Pequeno porte: FAISS.
+
+Tempo real/distribuído: Elasticsearch ou Qdrant.
+
+Multi-tenant: Weaviate com namespaces.
+
+Parametrização:
+
+Similaridade: cosine, dot, L2.
+
+Tamanho do top-k: balanceia precisão e latência.
+
+3. Arquitetura e Engenharia de Projeto
+3.1 Orquestração
+Ferramentas: LangChain, LlamaIndex, Haystack ou pipeline customizado.
+
+Organização:
+
+Modularidade entre retriever, generator, re-ranker e logger.
+
+Suporte a múltiplas bases com roteamento por namespace.
+
+3.2 Pipeline RAG Avançado
+Retrieval → (opcional re-ranking) → Context injection → Prompt → Geração.
+
+Re-rankers: Cohere Rerank, BGE-Reranker, Cross-encoders.
+
+Prompt Engineering:
+
+Instruções claras + contexto + pergunta.
+
+Estratégia de fallback com resposta “Não sei”.
+
+3.3 Logging e Monitoramento
+Armazene:
+
+Perguntas, respostas, chunks usados, tempo de resposta, embeddings.
+
+Ferramentas: Prometheus + Grafana, Sentry, Weights & Biases (W&B).
+
+4. Avaliação de Qualidade
+4.1 Métricas
+Precision@k, Recall@k, Mean Reciprocal Rank (MRR).
+
+Factualidade: via avaliação humana ou GPT-as-judge.
+
+Consistência: mede estabilidade de respostas a perguntas idênticas.
+
+Utilidade: feedback do usuário final.
+
+4.2 Avaliação Automatizada
+Técnicas:
+
+Ground truth (caso disponível).
+
+Chain-of-thought + GPT-4 para validação contextual.
+
+Score de relevância entre pergunta e chunks recuperados.
+
+5. Segurança, Escalabilidade e Governança
+5.1 Controle de Acesso
+Role-based Access Control (RBAC) nos dados e APIs.
+
+Logging de auditoria sobre queries e documentos acessados.
+
+5.2 Atualização Contínua
+Estratégia de versionamento de embeddings.
+
+Indexação incremental com controle de qualidade.
+
+5.3 Escalabilidade
+Escalar horizontalmente o retriever (usando shards).
+
+Cache de queries populares.
+
+Servir embeddings via endpoint (ex: FastAPI + Faiss).
+
+6. Boas Práticas e Considerações Finais
+Evite chunking cego; preserve integridade semântica (ex: por título, parágrafo, heading).
+
+Valide a confiabilidade das fontes.
+
+Adote fallback para consultas fora do escopo: “Desculpe, não sei”.
+
+Use análise de logs para identificar gaps de cobertura.
+
+Testes A/B com diferentes estratégias de prompting e reranking.

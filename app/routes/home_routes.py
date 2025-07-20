@@ -1,8 +1,17 @@
 # app/routes/home_routes.py
+"""
+Módulo de Rotas Home
+--------------------
+Define rotas para dashboard, análise de similaridade, upload de arquivos e análise de dopping.
+"""
+
+# Imports FastAPI e SQLAlchemy
 from fastapi import APIRouter, Request, Depends, UploadFile, File, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+
+# Imports internos do projeto
 import os
 import shutil
 from app.config.database import get_db
@@ -15,28 +24,39 @@ from app.controllers.home_controller import (
     clean_and_convert
 )
 from app.models.plot import PlotRequest
-from app.models.mol_model import SimilarityParams, DoppingRequest # Parâmetros de similaridade
+from app.models.mol_model import SimilarityParams, DoppingRequest
 import pandas as pd
 
-
+# Inicialização do roteador e templates
 router = APIRouter()
 templates = Jinja2Templates(directory="app/views/templates")
 UPLOAD_DIR = "uploads"
 
+# ---------------------- ROTAS DE DASHBOARD ----------------------
+
 @router.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request):
+    """
+    Renderiza a página principal do dashboard.
+    """
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
+# ---------------------- ROTAS DE SIMILARIDADE ----------------------
 
 @router.get("/dashboard/similarity", response_class=HTMLResponse)
 async def similarity_page(request: Request, db: Session = Depends(get_db)):
+    """
+    Renderiza a página de similaridade.
+    """
     return get_similarity_page(request, db)  # db passado corretamente aqui
 
 @router.post("/run-similarity")
 async def run_similarity(request: Request):
+    """
+    Executa análise de similaridade e retorna SVGs gerados.
+    """
     data = await request.json()
     file = data.get("file")
-    print(file)
     threshold = data.get("threshold")
     mode = data.get("mode")
 
@@ -47,11 +67,15 @@ async def run_similarity(request: Request):
         threshold=threshold,
         mode=mode
     )
-    print(svg_list)
     return JSONResponse(content={"svg_list": svg_list, "message": "Análise concluída com sucesso."})
+
+# ---------------------- ROTAS DE DOPPING ----------------------
 
 @router.post("/run-dopping")
 async def run_dopping(payload: DoppingRequest):
+    """
+    Executa análise de dopping com arquivos enviados.
+    """
     mz_path = os.path.join(UPLOAD_DIR, payload.mz_file)
     intensity_path = os.path.join(UPLOAD_DIR, payload.intensity_file)
     exact_mass = payload.exact_mass
@@ -83,10 +107,16 @@ async def run_dopping(payload: DoppingRequest):
 
 @router.get("/dashboard/aas-search", response_class=HTMLResponse)
 async def aas_page(request: Request):
+    """
+    Renderiza a página de busca de AAS.
+    """
     return templates.TemplateResponse("aas_search.html", {"request": request})
 
 @router.post("/plot-spectrum")
 async def plot_spectrum(payload: PlotRequest):
+    """
+    Gera gráfico de espectro a partir dos arquivos de massa e intensidade.
+    """
     mz_path = os.path.join(UPLOAD_DIR, payload.mz)
     intensity_path = os.path.join(UPLOAD_DIR, payload.intensity)
     if not os.path.exists(mz_path) or not os.path.exists(intensity_path):
@@ -112,4 +142,7 @@ async def plot_spectrum(payload: PlotRequest):
 
 @router.post("/upload-file")
 async def upload_file(file: UploadFile = File(...)):
+    """
+    Faz o upload de um arquivo.
+    """
     return handle_file_upload(file)
