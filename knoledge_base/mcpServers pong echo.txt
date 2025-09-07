@@ -1,0 +1,22 @@
+{
+" mcpServers ": {
+" pong_echo ": {
+" command ": "uv",
+" args ": [
+" -- directory ",
+"D:\\ MCPs \\ ping_server ",
+"run",
+" ping_server .py"
+]
+} ,
+"evoapi_mcp ": {
+" command": "uv",
+"args": [
+"-- directory",
+"/home/sakod/Documentos/curso_mcp/evoapi_mcp/evoapi_mcp.py",
+"run",
+"evoapi_mcp .py"
+]
+}
+}
+}
