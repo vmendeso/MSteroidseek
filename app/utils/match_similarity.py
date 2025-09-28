@@ -26,7 +26,7 @@ def match_FP(user_input, degree_freedom, df_fpx, df_db, threshold,  metric):
         fp_dfx = np.array([fp_dfx])
         print(f"lista de fps aqui **************{fp_dfx}")      
         df_completo = pd.concat([df_db,df_fpx], axis=1)        
-        basex = df_completo.iloc[:,3:].values.astype('uint32') 
+        basex = df_completo.iloc[:,4:].values
         print(f"lista de fps aqui **************{basex}")         
         var = getOnematch(base_train = basex, base_test = fp_dfx, complete_base = df_completo, similarity_metric=metric, alpha=1, beta=1, threshold=threshold)
         print(var)

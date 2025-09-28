@@ -66,11 +66,12 @@ def run_similarity_analysis(
     Executa análise de similaridade e gera SVGs.
     """
     try:
-        df_full = pd.read_sql_table(
-            table_name="similary_structur_mol",
-            con=engine,
-            schema="msteroid"
-        )
+        #df_full = pd.read_sql_table(
+        #    table_name="similary_structur_mol",
+        #    con=engine,
+        #    schema="msteroid"
+        #)
+        df_full = pd.read_csv('app/config/data/df_all_EI.csv')
         df_fpx = pd.read_csv("app/config/data/df_fp1_all_EI.csv")
         df_fpx = df_fpx.drop(df_fpx.columns[0], axis=1)
     except Exception as e:
