@@ -1,3 +1,0 @@
-curl -N -X POST http://200.137.206.3:443/ask \
-	-H 'Content-Type: application/json' \
-	-d '{"prompt": "Explique a gravidade."}'
